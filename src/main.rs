@@ -17,7 +17,7 @@ fn App() -> Html {
         let initial_theme = LocalStorage::get::<String>(THEME_STORAGE_KEY)
             .unwrap_or_else(|_| THEME_DEFAULT_VALUE.to_owned());
 
-        let theme_state = use_state(|| initial_theme);
+        let theme_state = use_mut_ref(|| initial_theme);
 
         let theme_item = |theme: &Theme| -> Html {
             let on_theme_change = {
@@ -25,7 +25,7 @@ fn App() -> Html {
                 let theme_value = theme.value.clone();
 
                 move |_| {
-                    theme_state.set(theme_value.clone());
+                    *theme_state.borrow_mut() = theme_value.clone();
                     LocalStorage::set(THEME_STORAGE_KEY, theme_value.clone()).unwrap();
                 }
             };
@@ -38,7 +38,7 @@ fn App() -> Html {
                         class={"theme-controller w-full btn btn-sm btn-block btn-ghost justify-start"}
                         aria-label={theme.name.clone()}
                         value={theme.value.clone()}
-                        checked={theme.value == *theme_state.clone()}
+                        checked={theme.value == *theme_state.borrow()}
                         onchange={on_theme_change}
                     />
                 </li>
